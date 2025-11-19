@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>똥 피하기 게임 (Ddong Piha-gi) - Firebase 리더보드 버전</title>
+    <title>똥 피하기 게임 (The Poops)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -251,8 +251,6 @@
         let userId = 'anonymous';
         let nickname = '';
         let leaderboardMode = 'score'; // score | time | maxCombo
-        const GAME_VERSION = '1.0';
-        const GAME_VERSION = 'v1.0';
 
         async function setupFirebase() {
             const userIdDisplay = document.getElementById('userIdDisplay');
@@ -327,34 +325,6 @@
             }
         }
 
-        function formatShortDate(date) {
-            if (!date) return '';
-            const yy = date.getFullYear() % 100;
-            const m = date.getMonth() + 1;
-            const d = date.getDate();
-            let h = date.getHours();
-            const min = date.getMinutes();
-            const ampm = h >= 12 ? 'pm' : 'am';
-            h = h % 12;
-            if (h === 0) h = 12;
-            const mm = String(min).padStart(2, '0');
-            return `${yy}-${m}-${d} ${ampm} ${h}:${mm}`;
-        }
-
-        function formatShortDate(date) {
-            if (!date) return '';
-            const yy = date.getFullYear() % 100;
-            const m = date.getMonth() + 1;
-            const d = date.getDate();
-            let h = date.getHours();
-            const min = date.getMinutes();
-            const ampm = h >= 12 ? 'pm' : 'am';
-            h = h % 12;
-            if (h === 0) h = 12;
-            const mm = String(min).padStart(2, '0');
-            return `${yy}-${m}-${d} ${ampm} ${h}:${mm}`;
-        }
-
         function renderLeaderboard(scores, mode = leaderboardMode) {
             const list = document.getElementById('leaderboardList');
             list.innerHTML = '';
@@ -366,7 +336,7 @@
                 const rank = index + 1;
                 const isCurrentUser = data.userId === userId;
                 const createdDate = data.createdAt && data.createdAt.toDate ? data.createdAt.toDate() : null;
-                const timeStr = formatShortDate(createdDate);
+                const timeStr = createdDate ? createdDate.toLocaleString('ko-KR') : '';
                 const survived = typeof data.time === 'number' ? `${data.time.toFixed(1)}초` : '-';
                 const maxComboText = typeof data.maxCombo === 'number' ? `${data.maxCombo}콤보` : '-';
 
@@ -412,9 +382,9 @@
             const scoreValue = document.getElementById('scoreValue');
             const timeValue = document.getElementById('timeValue');
 
-            const MAX_PLAYER_SPEED = 5;
-            const ACCELERATION = 0.35;
-            const FRICTION = 0.92;
+            const MAX_PLAYER_SPEED = 7;
+            const ACCELERATION = 0.5;
+            const FRICTION = 0.9;
             const OBJECT_SIZE = 30;
             const BONUS_OBJECT_SIZE = 30;
             const POOP_HITBOX_SIZE = 20;
@@ -860,7 +830,7 @@
                 resizeCanvas();
                 draw();
                 showMessageBox(
-                    `똥 피하기 게임 v${GAME_VERSION}`,
+                    '똥 피하기 게임',
                     '닉네임을 입력하고 게임을 시작하세요!<br>게임이 끝나면 닉네임/점수/생존/최대콤보/종료 시간이 리더보드에 저장됩니다.',
                     '게임 시작',
                     initGame,
