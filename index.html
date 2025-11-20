@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>The Poops (똥 피하기 게임)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
         .arcade-font {
             font-family: 'Press Start 2P', cursive;
             text-shadow: 2px 2px #333;
@@ -72,7 +73,7 @@
             font-weight: bold;
             border: 2px solid #f97316;
         }
-        .stage-1 { 
+        .stage-1 {
             background: linear-gradient(to bottom, #87ceeb 0%, #b0e0e6 40%, #a2cd5a 85%, #6b8e23 100%);
             border-color: #38761d;
             color: #333;
@@ -116,13 +117,15 @@
             min-height: 45px;
             font-size: 1.25rem;
         }
-        .ui-panel .stat-group { color: #fff; }
+        .ui-panel .stat-group {
+            color: #fff;
+        }
         .message-box {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(107, 68, 35, 0.9);
+            background: rgba(107, 68, 35, 0.95);
             border: 4px solid #ffeb3b;
             padding: 30px;
             border-radius: 10px;
@@ -176,7 +179,7 @@
         @media (min-width: 640px) {
             #touchControls { display: none; }
         }
-        
+
         /* 스테이지 라벨: 게임 배경(캔버스) 위 좌측 상단에 고정 표시 */
         #stageLabel.stage-label {
             position: absolute;
@@ -190,33 +193,28 @@
             color: #ffffff;
             z-index: 20;
         }
-        }
     </style>
 </head>
 <body class="p-4">
     <div id="mainWrapper">
         <div id="gameContainer" class="stage-1">
-            <div class="ui-panel arcade-font flex justify-between items-center px-2 py-2 text-lg md:text-lg">
-                <div class="stat-group flex items-center space-x-1 whitespace-nowrap flex-shrink-0 text-white">
+            <div class="ui-panel arcade-font flex justify-between items-center px-2 py-2 text-lg">
+                <div class="stat-group flex items-center space-x-1 whitespace-nowrap flex-shrink-0">
                     <span class="text-yellow-400">점수:</span><span id="scoreValue">0</span>
                 </div>
-                <div class="stat-group flex-1 text-center text-lg text-white">
+                <div class="stat-group flex-1 text-center whitespace-nowrap">
                     <span class="mr-1">콤보:</span>
                     <span id="comboValue" class="font-bold">0</span>
                 </div>
-                <div class="stat-group flex items-center space-x-1 whitespace-nowrap flex-shrink-0 text-white">
+                <div class="stat-group flex items-center space-x-1 whitespace-nowrap flex-shrink-0">
                     <span>⏱️</span><span id="timeValue">0.0s</span>
                 </div>
             </div>
             <div id="stageLabel" class="stage-label">STAGE 1 · 시골</div>
             <canvas id="gameCanvas" width="500" height="500"></canvas>
             <div id="touchControls">
-                <div id="leftButton" class="touch-button">
-                    ◀
-                </div>
-                <div id="rightButton" class="touch-button">
-                    ▶
-                </div>
+                <div id="leftButton" class="touch-button">◀</div>
+                <div id="rightButton" class="touch-button">▶</div>
             </div>
             <div id="messageBox" class="message-box hidden">
                 <h2 id="messageTitle" class="arcade-font text-xl md:text-3xl mb-4 text-yellow-300"></h2>
@@ -252,7 +250,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, limit, getDocs, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase 설정 (질문에 적어준 값 사용)
+        // Firebase 설정
         const firebaseConfig = {
             apiKey: "AIzaSyAky3iQqgy4rUUjYlMOM_eSQ7BszEmeLmM",
             authDomain: "my-poop-game.firebaseapp.com",
@@ -263,16 +261,15 @@
             measurementId: "G-KP1WVHWND4"
         };
 
-        // ===== 전역 상태 =====
-        const GAME_VERSION = '1.0';
-        let app, db, auth;
-        let userId = 'anonymous';
-        let nickname = '';
-        let leaderboardMode = 'score'; // score | time | maxCombo
+        const GAME_VERSION = "1.0";
 
-        // ===== Firebase & 리더보드 =====
+        let app, db, auth;
+        let userId = "anonymous";
+        let nickname = "";
+        let leaderboardMode = "score"; // score | time | maxCombo
+
         async function setupFirebase() {
-            const userIdDisplay = document.getElementById('userIdDisplay');
+            const userIdDisplay = document.getElementById("userIdDisplay");
             try {
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -285,15 +282,15 @@
                         userId = user.uid;
                         userIdDisplay.textContent = `ID: ${userId}`;
                     } else {
-                        userId = 'anonymous';
-                        userIdDisplay.textContent = 'ID: anonymous';
+                        userId = "anonymous";
+                        userIdDisplay.textContent = "ID: anonymous";
                     }
                     fetchLeaderboard(leaderboardMode);
                 });
             } catch (error) {
-                console.error('Firebase 초기화/인증 에러:', error);
+                console.error("Firebase 초기화/인증 에러:", error);
                 if (userIdDisplay) {
-                    userIdDisplay.textContent = 'ID: 리더보드 비활성화 (에러)';
+                    userIdDisplay.textContent = "ID: 리더보드 비활성화 (에러)";
                 }
             }
         }
@@ -301,56 +298,55 @@
         // 점수 저장 (닉네임 + 점수 + 생존시간 + 최대콤보 + 종료시간)
         async function saveScore(score, time, maxCombo) {
             if (!db || score <= 0) {
-                console.log('점수 0 이하는 저장하지 않습니다.');
+                console.log("점수 0 이하는 저장하지 않습니다.");
                 return;
             }
             try {
-                await addDoc(collection(db, 'leaderboard'), {
-                    nickname: nickname || '익명',
+                await addDoc(collection(db, "leaderboard"), {
+                    nickname: nickname || "익명",
                     score: score,
                     time: time,
                     maxCombo: maxCombo,
                     userId: userId,
-                    createdAt: serverTimestamp() // 게임 종료 시각
+                    createdAt: serverTimestamp()
                 });
-                console.log('Score saved');
+                console.log("Score saved");
                 fetchLeaderboard(leaderboardMode);
             } catch (e) {
-                console.error('Error saving score: ', e);
+                console.error("Error saving score: ", e);
             }
         }
 
         // 짧은 날짜 포맷: YY-M-D am/pm H:MM
         function formatShortDate(date) {
-            if (!date) return '';
+            if (!date) return "";
             const yy = date.getFullYear() % 100;
             const m = date.getMonth() + 1;
             const d = date.getDate();
             let h = date.getHours();
             const min = date.getMinutes();
-            const ampm = h >= 12 ? 'pm' : 'am';
+            const ampm = h >= 12 ? "pm" : "am";
             h = h % 12;
             if (h === 0) h = 12;
-            const mm = String(min).padStart(2, '0');
+            const mm = String(min).padStart(2, "0");
             return `${yy}-${m}-${d} ${ampm} ${h}:${mm}`;
         }
 
-        // 리더보드 가져오기 (탭에 따라 정렬 기준 변경)
         async function fetchLeaderboard(mode = leaderboardMode) {
             if (!db) return;
             leaderboardMode = mode;
-            const list = document.getElementById('leaderboardList');
+            const list = document.getElementById("leaderboardList");
             if (list) {
                 list.innerHTML = '<li class="p-2 text-center text-gray-500">점수 목록을 가져오는 중...</li>';
             }
             try {
-                let orderField = 'score';
-                if (mode === 'time') orderField = 'time';
-                else if (mode === 'maxCombo') orderField = 'maxCombo';
+                let orderField = "score";
+                if (mode === "time") orderField = "time";
+                else if (mode === "maxCombo") orderField = "maxCombo";
 
                 const q = query(
-                    collection(db, 'leaderboard'),
-                    orderBy(orderField, 'desc'),
+                    collection(db, "leaderboard"),
+                    orderBy(orderField, "desc"),
                     limit(10)
                 );
                 const snap = await getDocs(q);
@@ -358,7 +354,7 @@
                 snap.forEach((doc) => scores.push(doc.data()));
                 renderLeaderboard(scores, mode);
             } catch (e) {
-                console.error('Error fetching leaderboard: ', e);
+                console.error("Error fetching leaderboard: ", e);
                 if (list) {
                     list.innerHTML = '<li class="p-2 text-red-500 text-center">리더보드 로드 실패</li>';
                 }
@@ -366,9 +362,9 @@
         }
 
         function renderLeaderboard(scores, mode = leaderboardMode) {
-            const list = document.getElementById('leaderboardList');
+            const list = document.getElementById("leaderboardList");
             if (!list) return;
-            list.innerHTML = '';
+            list.innerHTML = "";
             if (scores.length === 0) {
                 list.innerHTML = '<li class="p-2 text-center text-gray-500">아직 등록된 최고 점수가 없습니다.</li>';
                 return;
@@ -378,29 +374,29 @@
                 const isCurrentUser = data.userId === userId;
                 const createdDate = data.createdAt && data.createdAt.toDate ? data.createdAt.toDate() : null;
                 const timeStr = formatShortDate(createdDate);
-                const survived = typeof data.time === 'number' ? `${data.time.toFixed(1)}초` : '-';
-                const maxComboText = typeof data.maxCombo === 'number' ? `${data.maxCombo}콤보` : '-';
+                const survived = typeof data.time === "number" ? `${data.time.toFixed(1)}초` : "-";
+                const maxComboText = typeof data.maxCombo === "number" ? `${data.maxCombo}콤보` : "-";
 
-                let mainValue = '';
-                if (mode === 'time') {
+                let mainValue = "";
+                if (mode === "time") {
                     mainValue = survived;
-                } else if (mode === 'maxCombo') {
+                } else if (mode === "maxCombo") {
                     mainValue = maxComboText;
                 } else {
-                    const scoreVal = typeof data.score === 'number' ? data.score : 0;
+                    const scoreVal = typeof data.score === "number" ? data.score : 0;
                     mainValue = `${scoreVal}점`;
                 }
 
-                const item = document.createElement('li');
-                item.className = `flex flex-col p-2 leaderboard-item ${isCurrentUser ? 'current-user' : ''} shadow-sm`;
+                const item = document.createElement("li");
+                item.className = `flex flex-col p-2 leaderboard-item ${isCurrentUser ? "current-user" : ""} shadow-sm`;
                 item.innerHTML = `
                     <div class="flex items-center text-sm mb-1">
                         <span class="w-1/6 text-center font-bold">${rank}.</span>
-                        <span class="w-3/6 text-left break-all">${data.nickname || '(익명)'}</span>
+                        <span class="w-3/6 text-left break-all">${data.nickname || "(익명)"}</span>
                         <span class="w-2/6 text-right font-mono">${mainValue}</span>
                     </div>
                     <div class="flex justify-between text-[10px] text-gray-600">
-                        <span>점수: ${typeof data.score === 'number' ? data.score : 0} / 생존: ${survived} / 최대: ${maxComboText}</span>
+                        <span>점수: ${typeof data.score === "number" ? data.score : 0} / 생존: ${survived} / 최대: ${maxComboText}</span>
                         <span>${timeStr}</span>
                     </div>
                 `;
@@ -409,22 +405,19 @@
         }
 
         // ================= 게임 로직 =================
-        document.addEventListener('DOMContentLoaded', () => {
-            // Firebase 세팅 시작
+        document.addEventListener("DOMContentLoaded", () => {
             setupFirebase();
 
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            const gameContainer = document.getElementById('gameContainer');
-            const messageBox = document.getElementById('messageBox');
-            let actionButton = document.getElementById('actionButton');
-            const nicknameInput = document.getElementById('nicknameInput');
-            const comboValue = document.getElementById('comboValue');
+            const canvas = document.getElementById("gameCanvas");
+            const ctx = canvas.getContext("2d");
+            const gameContainer = document.getElementById("gameContainer");
+            const messageBox = document.getElementById("messageBox");
+            let actionButton = document.getElementById("actionButton");
+            const nicknameInput = document.getElementById("nicknameInput");
+            const comboValueEl = document.getElementById("comboValue");
+            const scoreValueEl = document.getElementById("scoreValue");
+            const timeValueEl = document.getElementById("timeValue");
 
-            const scoreValue = document.getElementById('scoreValue');
-            const timeValue = document.getElementById('timeValue');
-
-            // 조작 감도 조절 값 (더 둔감하게)
             const MAX_PLAYER_SPEED = 5;
             const ACCELERATION = 0.35;
             const FRICTION = 0.92;
@@ -439,18 +432,18 @@
             const FEVER_DURATION = 10000;
             const SCORE_MULTIPLIER = 2;
 
-            const FIXED_POOP_EMOJI = '💩';
-            const FIXED_PLAYER_EMOJI = '🏃';
+            const FIXED_POOP_EMOJI = "💩";
+            const FIXED_PLAYER_EMOJI = "🏃";
 
             const STAGES = [
-                { time: 30, name: '시골', emoji_player: FIXED_PLAYER_EMOJI, emoji_poop: FIXED_POOP_EMOJI, css_class: 'stage-1' },
-                { time: 60, name: '도시', emoji_player: FIXED_PLAYER_EMOJI, emoji_poop: FIXED_POOP_EMOJI, css_class: 'stage-2' },
-                { time: 120, name: '우주', emoji_player: FIXED_PLAYER_EMOJI, emoji_poop: FIXED_POOP_EMOJI, css_class: 'stage-3' },
-                { time: 180, name: '블랙홀', emoji_player: FIXED_PLAYER_EMOJI, emoji_poop: FIXED_POOP_EMOJI, css_class: 'stage-4' },
-                { time: Infinity, name: '천국', emoji_player: FIXED_PLAYER_EMOJI, emoji_poop: '✨', css_class: 'stage-5' }
+                { time: 30, name: "시골", emoji_player: FIXED_PLAYER_EMOJI, emoji_poop: FIXED_POOP_EMOJI, css_class: "stage-1" },
+                { time: 60, name: "도시", emoji_player: FIXED_PLAYER_EMOJI, emoji_poop: FIXED_POOP_EMOJI, css_class: "stage-2" },
+                { time: 120, name: "우주", emoji_player: FIXED_PLAYER_EMOJI, emoji_poop: FIXED_POOP_EMOJI, css_class: "stage-3" },
+                { time: 180, name: "블랙홀", emoji_player: FIXED_PLAYER_EMOJI, emoji_poop: FIXED_POOP_EMOJI, css_class: "stage-4" },
+                { time: Infinity, name: "천국", emoji_player: FIXED_PLAYER_EMOJI, emoji_poop: FIXED_POOP_EMOJI, css_class: "stage-5" }
             ];
 
-            let gameState = 'menu';
+            let gameState = "menu";
             let score = 0;
             let combo = 0;
             let maxCombo = 0;
@@ -460,28 +453,35 @@
             let startTime = 0;
             let lastSpawnTime = 0;
             let spawnInterval = 700;
-            let lastMoktakSpawnTime = 0;
+            let lastBonusSpawnTime = 0;
             let animationFrameId;
             let currentStageIndex = 0;
+
+            // 일시정지 시간 관리 (pause 동안 시간 제외)
+            let totalPausedDuration = 0;
+            let pauseStartedAt = null;
 
             const keys = { left: false, right: false };
             const touchControls = { left: false, right: false };
 
+            function getElapsedSeconds() {
+                if (!startTime) return 0;
+                return (Date.now() - startTime - totalPausedDuration) / 1000;
+            }
+
             function resizeCanvas() {
                 const container = gameContainer;
                 canvas.width = container.clientWidth;
-                const uiHeight = document.querySelector('.ui-panel').offsetHeight;
-                const touchControlsElement = document.getElementById('touchControls');
-                const touchHeight = (window.getComputedStyle(touchControlsElement).display !== 'none')
-                    ? touchControlsElement.offsetHeight
-                    : 0;
+                const uiHeight = document.querySelector(".ui-panel").offsetHeight;
+                const touchControlsElement = document.getElementById("touchControls");
+                const touchHeight = window.getComputedStyle(touchControlsElement).display !== "none" ? touchControlsElement.offsetHeight : 0;
                 canvas.height = container.clientHeight - uiHeight - touchHeight;
                 if (player) {
                     player.y = canvas.height - player.height - 20;
                     player.x = Math.min(Math.max(player.x, -player.width / 2), canvas.width - player.width / 2);
                 }
             }
-            window.addEventListener('resize', resizeCanvas);
+            window.addEventListener("resize", resizeCanvas);
 
             class Player {
                 constructor() {
@@ -493,9 +493,9 @@
                     this.HITBOX_WIDTH = 24;
                 }
                 draw() {
-                    ctx.font = '28px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
+                    ctx.font = "28px Arial";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
                     ctx.fillText(FIXED_PLAYER_EMOJI, this.x + this.width / 2, this.y + this.height / 2);
                 }
                 update() {
@@ -527,20 +527,22 @@
                     this.size = OBJECT_SIZE;
                     this.x = Math.random() * (canvas.width - this.size);
                     this.y = -this.size;
-                    const timeElapsed = (Date.now() - startTime) / 1000;
-                    const baseSpeed = 3 + Math.floor(timeElapsed / 10) * 0.5;
-                    this.speed = baseSpeed + (Math.random() * 3) - 1.5;
+                    const elapsed = getElapsedSeconds();
+                    const baseSpeed = 3 + Math.floor(elapsed / 10) * 0.5;
+                    this.speed = baseSpeed + Math.random() * 3 - 1.5;
                     this.speed = Math.max(2.5, this.speed);
                     this.emoji = emoji;
                     this.passedPlayer = false;
                 }
                 draw() {
                     ctx.font = `${this.size}px Arial`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
                     ctx.fillText(this.emoji, this.x + this.size / 2, this.y + this.size / 2);
                 }
-                update() { this.y += this.speed; }
+                update() {
+                    this.y += this.speed;
+                }
                 getBounds() {
                     return {
                         x: this.x + POOP_HITBOX_OFFSET,
@@ -556,22 +558,24 @@
                     this.size = BONUS_OBJECT_SIZE;
                     this.x = Math.random() * (canvas.width - this.size);
                     this.y = -this.size;
-                    const timeElapsed = (Date.now() - startTime) / 1000;
-                    this.speed = 2.5 + Math.floor(timeElapsed / 10) * 0.4;
-                    this.emoji = '⭐';
+                    const elapsed = getElapsedSeconds();
+                    this.speed = 2.5 + Math.floor(elapsed / 10) * 0.4;
+                    this.emoji = "⭐";
                 }
                 draw() {
                     ctx.save();
                     ctx.globalAlpha = Math.sin(Date.now() / 150) * 0.2 + 0.8;
                     ctx.shadowBlur = 15;
-                    ctx.shadowColor = 'rgba(255, 255, 0, 1)';
+                    ctx.shadowColor = "rgba(255, 255, 0, 1)";
                     ctx.font = `${this.size}px Arial`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
                     ctx.fillText(this.emoji, this.x + this.size / 2, this.y + this.size / 2);
                     ctx.restore();
                 }
-                update() { this.y += this.speed; }
+                update() {
+                    this.y += this.speed;
+                }
                 getBounds() {
                     return { x: this.x, y: this.y, width: this.size, height: this.size };
                 }
@@ -584,17 +588,23 @@
             function updateNicknameFromInput() {
                 nickname = nicknameInput.value.trim();
             }
+            nicknameInput.addEventListener("input", updateNicknameFromInput);
 
-            nicknameInput.addEventListener('input', updateNicknameFromInput);
+            function updateStageVisuals(stage) {
+                STAGES.forEach((s) => gameContainer.classList.remove(s.css_class));
+                gameContainer.classList.add(stage.css_class);
+                const stageLabel = document.getElementById("stageLabel");
+                if (stageLabel) stageLabel.textContent = `STAGE ${currentStageIndex + 1} · ${stage.name}`;
+            }
 
             function initGame() {
-                if (!nickname || nickname.trim() === '') {
+                if (!nickname || nickname.trim() === "") {
                     nicknameInput.focus();
-                    nicknameInput.classList.add('ring', 'ring-red-400');
-                    setTimeout(() => nicknameInput.classList.remove('ring', 'ring-red-400'), 600);
+                    nicknameInput.classList.add("ring", "ring-red-400");
+                    setTimeout(() => nicknameInput.classList.remove("ring", "ring-red-400"), 600);
                     return;
                 }
-                gameState = 'playing';
+                gameState = "playing";
                 score = 0;
                 combo = 0;
                 maxCombo = 0;
@@ -602,8 +612,10 @@
                 feverEndTime = 0;
                 lastFeverComboLevel = 0;
                 startTime = Date.now();
+                totalPausedDuration = 0;
+                pauseStartedAt = null;
                 lastSpawnTime = 0;
-                lastMoktakSpawnTime = 0;
+                lastBonusSpawnTime = 0;
                 spawnInterval = 700;
                 currentStageIndex = 0;
 
@@ -617,14 +629,7 @@
                 resizeCanvas();
 
                 if (animationFrameId) cancelAnimationFrame(animationFrameId);
-                gameLoop(performance.now());
-            }
-
-            function updateStageVisuals(stage) {
-                STAGES.forEach(s => gameContainer.classList.remove(s.css_class));
-                gameContainer.classList.add(stage.css_class);
-                const stageLabel = document.getElementById('stageLabel');
-                if (stageLabel) stageLabel.textContent = `STAGE ${currentStageIndex + 1} · ${stage.name}`;
+                animationFrameId = requestAnimationFrame(gameLoop);
             }
 
             function startFeverMode(now, currentComboLevel) {
@@ -633,23 +638,22 @@
                 lastFeverComboLevel = currentComboLevel;
             }
 
-            function gameLoop(currentTime) {
-                if (gameState === 'playing') {
-                    update(currentTime);
+            function gameLoop(timestamp) {
+                if (gameState === "playing") {
+                    update();
                     draw();
-                } else if (gameState === 'paused') {
-                    draw();
-                } else if (gameState === 'menu' || gameState === 'gameOver') {
+                } else if (gameState === "paused" || gameState === "menu" || gameState === "gameOver") {
                     draw();
                 }
                 animationFrameId = requestAnimationFrame(gameLoop);
             }
 
-            function update(time) {
+            function update() {
                 const now = Date.now();
-                const timeElapsed = (now - startTime) / 1000;
+                const elapsed = getElapsedSeconds();
 
-                if (currentStageIndex < STAGES.length - 1 && timeElapsed >= STAGES[currentStageIndex].time) {
+                // 스테이지 진행
+                if (currentStageIndex < STAGES.length - 1 && elapsed >= STAGES[currentStageIndex].time) {
                     currentStageIndex++;
                     updateStageVisuals(STAGES[currentStageIndex]);
                 }
@@ -660,32 +664,32 @@
                     isFeverMode = false;
                 }
 
-                spawnInterval = Math.max(150, 700 - timeElapsed * 15);
+                spawnInterval = Math.max(150, 700 - elapsed * 15);
 
                 if (now - lastSpawnTime > spawnInterval) {
                     fallingObjects.push(new FallingObject(STAGES[currentStageIndex].emoji_poop));
                     lastSpawnTime = now;
                 }
 
-                fallingObjects.forEach(obj => obj.update());
-                bonusObjects.forEach(obj => obj.update());
+                fallingObjects.forEach((obj) => obj.update());
+                bonusObjects.forEach((obj) => obj.update());
 
                 const bonusObjectsOnScreen = bonusObjects.length;
-                const timeSinceLastSpawn = now - lastMoktakSpawnTime;
-                if (bonusObjectsOnScreen === 0 && timeSinceLastSpawn > 3000) {
+                const timeSinceLastBonus = now - lastBonusSpawnTime;
+                if (bonusObjectsOnScreen === 0 && timeSinceLastBonus > 3000) {
                     bonusObjects.push(new BonusObject());
-                    lastMoktakSpawnTime = now;
+                    lastBonusSpawnTime = now;
                 }
 
-                let successfullyDodged = [];
-                fallingObjects.forEach(obj => {
+                const successfullyDodged = [];
+                fallingObjects.forEach((obj) => {
                     if (obj.y > player.y + player.height && !obj.passedPlayer) {
                         obj.passedPlayer = true;
                         successfullyDodged.push(obj);
                     }
                 });
 
-                successfullyDodged.forEach(obj => {
+                successfullyDodged.forEach((obj) => {
                     combo++;
                     maxCombo = Math.max(maxCombo, combo);
                     let point = 1;
@@ -697,16 +701,16 @@
                     }
                 });
 
-                const missedBonus = bonusObjects.filter(obj => obj.y >= canvas.height + obj.size);
+                const missedBonus = bonusObjects.filter((obj) => obj.y >= canvas.height + obj.size);
                 if (missedBonus.length > 0) {
                     combo = 0;
                     isFeverMode = false;
                     lastFeverComboLevel = 0;
-                    lastMoktakSpawnTime = now;
+                    lastBonusSpawnTime = now;
                 }
 
-                fallingObjects = fallingObjects.filter(obj => obj.y < canvas.height + obj.size);
-                bonusObjects = bonusObjects.filter(obj => obj.y <	canvas.height + obj.size);
+                fallingObjects = fallingObjects.filter((obj) => obj.y < canvas.height + obj.size);
+                bonusObjects = bonusObjects.filter((obj) => obj.y < canvas.height + obj.size);
 
                 checkCollisions();
                 updateUI();
@@ -714,190 +718,206 @@
 
             function checkCollisions() {
                 const playerBounds = player.getBounds();
-                let moktakCollected = [];
-                const now = Date.now();
+                const collectedBonusIndexes = [];
 
                 for (let i = 0; i < fallingObjects.length; i++) {
                     const obj = fallingObjects[i];
                     const objBounds = obj.getBounds();
-                    if (playerBounds.x < objBounds.x + objBounds.width &&
+                    if (
+                        playerBounds.x < objBounds.x + objBounds.width &&
                         playerBounds.x + playerBounds.width > objBounds.x &&
                         playerBounds.y < objBounds.y + objBounds.height &&
-                        playerBounds.y + playerBounds.height > objBounds.y) {
+                        playerBounds.y + playerBounds.height > objBounds.y
+                    ) {
                         endGame();
                         return;
                     }
                 }
 
+                const now = Date.now();
                 for (let i = 0; i < bonusObjects.length; i++) {
                     const bonus = bonusObjects[i];
                     const bonusBounds = bonus.getBounds();
-                    if (playerBounds.x < bonusBounds.x + bonusBounds.width &&
+                    if (
+                        playerBounds.x < bonusBounds.x + bonusBounds.width &&
                         playerBounds.x + playerBounds.width > bonusBounds.x &&
                         playerBounds.y < bonusBounds.y + bonusBounds.height &&
-                        playerBounds.y + playerBounds.height > bonusBounds.y) {
+                        playerBounds.y + playerBounds.height > bonusBounds.y
+                    ) {
                         score += BONUS_SCORE;
-                        moktakCollected.push(i);
-                        lastMoktakSpawnTime = now;
+                        collectedBonusIndexes.push(i);
+                        lastBonusSpawnTime = now;
                     }
                 }
-                for (let i = moktakCollected.length - 1; i >= 0; i--) {
-                    bonusObjects.splice(moktakCollected[i], 1);
+                for (let i = collectedBonusIndexes.length - 1; i >= 0; i--) {
+                    bonusObjects.splice(collectedBonusIndexes[i], 1);
                 }
             }
 
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.globalAlpha = 1.0;
+
                 if (player) player.draw();
-                fallingObjects.forEach(obj => obj.draw());
-                bonusObjects.forEach(obj => obj.draw());
+                fallingObjects.forEach((obj) => obj.draw());
+                bonusObjects.forEach((obj) => obj.draw());
 
                 if (isFeverMode) {
                     ctx.save();
                     const alpha = Math.sin(Date.now() / 80) * 0.3 + 0.7;
                     ctx.globalAlpha = alpha;
-                    ctx.fillStyle = '#FFD700';
-                    ctx.shadowColor = '#FF0000';
+                    ctx.fillStyle = "#FFD700";
+                    ctx.shadowColor = "#FF0000";
                     ctx.shadowBlur = 15;
-                    ctx.font = '30px "Press Start 2P", cursive';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('FEVER TIME!', canvas.width / 2, canvas.height / 2);
+                    ctx.font = '22px "Press Start 2P", cursive';
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("FEVER TIME!", canvas.width / 2, canvas.height / 2);
                     ctx.restore();
                 }
             }
 
             function updateUI() {
-                const timeElapsed = gameState === 'playing' ? (Date.now() - startTime) / 1000 : 0;
-                scoreValue.textContent = score;
-                timeValue.textContent = `${timeElapsed.toFixed(1)}s`;
-                if (comboValue) comboValue.textContent = combo;
+                const elapsed = startTime ? getElapsedSeconds() : 0;
+                scoreValueEl.textContent = score;
+                timeValueEl.textContent = `${elapsed.toFixed(1)}s`;
+                if (comboValueEl) comboValueEl.textContent = combo;
             }
 
-            function showMessageBox(title, text, buttonText, buttonAction, isGameOver) {
-                document.getElementById('messageTitle').innerHTML = title;
-                document.getElementById('messageText').innerHTML = text;
+            function showMessageBox(titleHTML, textHTML, buttonText, buttonAction, isGameOver) {
+                const titleEl = document.getElementById("messageTitle");
+                const textEl = document.getElementById("messageText");
+                titleEl.innerHTML = titleHTML;
+                textEl.innerHTML = textHTML;
+
                 const newActionButton = actionButton.cloneNode(true);
                 actionButton.parentNode.replaceChild(newActionButton, actionButton);
                 actionButton = newActionButton;
                 actionButton.textContent = buttonText;
-                actionButton.addEventListener('click', buttonAction);
+                actionButton.addEventListener("click", buttonAction);
+
                 if (isGameOver) {
-                    document.getElementById('messageText').innerHTML += '<br><span class="text-xs text-yellow-400">(R 키를 눌러도 재시작)</span>';
+                    textEl.innerHTML += '<br><span class="text-xs text-yellow-400">(R 키를 눌러도 재시작)</span>';
                 }
-                messageBox.classList.remove('hidden');
+                messageBox.classList.remove("hidden");
             }
 
             function hideMessageBox() {
-                messageBox.classList.add('hidden');
+                messageBox.classList.add("hidden");
             }
 
             function endGame() {
-                gameState = 'gameOver';
+                gameState = "gameOver";
                 cancelAnimationFrame(animationFrameId);
-                const finalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+                const finalTime = getElapsedSeconds().toFixed(1);
                 const finalMaxCombo = maxCombo;
                 if (score > 0) {
                     saveScore(score, parseFloat(finalTime), finalMaxCombo);
                 }
-                showMessageBox(
-                    `<span class='text-3xl font-bold block text-center'>GAME OVER</span>`,
-                    `닉네임: <b>${nickname}</b><br>생존 시간: ${finalTime}초<br>점수: ${score}점<br>최대 콤보: ${finalMaxCombo}회`,
-                    '다시 시작',
-                    initGame,
-                    true
-                );
+                const titleHTML = `<span class="text-3xl font-bold block text-center">GAME OVER</span>`;
+                const bodyHTML = `닉네임: <b>${nickname}</b><br>생존 시간: ${finalTime}초<br>점수: ${score}점<br>최대 콤보: ${finalMaxCombo}회`;
+                showMessageBox(titleHTML, bodyHTML, "다시 시작", initGame, true);
                 isFeverMode = false;
                 updateUI();
             }
 
+            function resumeFromPause() {
+                if (pauseStartedAt) {
+                    totalPausedDuration += Date.now() - pauseStartedAt;
+                    pauseStartedAt = null;
+                }
+                gameState = "playing";
+                hideMessageBox();
+            }
+
             function togglePause() {
-                if (gameState === 'playing') {
-                    gameState = 'paused';
+                if (gameState === "playing") {
+                    gameState = "paused";
+                    pauseStartedAt = Date.now();
                     showMessageBox(
-                        'PAUSED',
-                        'ESC 키 또는 버튼을 눌러 계속하세요.',
-                        '계속하기',
+                        "PAUSED",
+                        "ESC 키 또는 버튼을 눌러 계속하세요.",
+                        "계속하기",
                         () => {
-                            gameState = 'playing';
-                            hideMessageBox();
+                            resumeFromPause();
                         },
                         false
                     );
-                } else if (gameState === 'paused') {
-                    gameState = 'playing';
-                    hideMessageBox();
+                } else if (gameState === "paused") {
+                    resumeFromPause();
                 }
             }
 
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    if (gameState === 'playing' || gameState === 'paused') togglePause();
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    if (gameState === "playing" || gameState === "paused") togglePause();
                 }
-                if (gameState === 'playing') {
-                    if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-                    if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-                } else if (gameState === 'gameOver' && (e.key === 'r' || e.key === 'R')) {
+                if (gameState === "playing") {
+                    if (e.key === "ArrowLeft" || e.key === "a") keys.left = true;
+                    if (e.key === "ArrowRight" || e.key === "d") keys.right = true;
+                } else if (gameState === "gameOver" && (e.key === "r" || e.key === "R")) {
                     initGame();
                 }
             });
-            document.addEventListener('keyup', (e) => {
-                if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-                if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+
+            document.addEventListener("keyup", (e) => {
+                if (e.key === "ArrowLeft" || e.key === "a") keys.left = false;
+                if (e.key === "ArrowRight" || e.key === "d") keys.right = false;
             });
 
-            const leftButton = document.getElementById('leftButton');
-            const rightButton = document.getElementById('rightButton');
+            const leftButton = document.getElementById("leftButton");
+            const rightButton = document.getElementById("rightButton");
+
             function handleInputStart(e, control) {
                 e.preventDefault();
-                if (gameState === 'playing') {
-                    if (e.type.startsWith('touch')) touchControls[control] = true;
+                if (gameState === "playing") {
+                    if (e.type.startsWith("touch")) touchControls[control] = true;
                     else keys[control] = true;
                 }
             }
             function handleInputEnd(e, control) {
                 e.preventDefault();
-                if (e.type.startsWith('touch')) touchControls[control] = false;
+                if (e.type.startsWith("touch")) touchControls[control] = false;
                 else keys[control] = false;
             }
-            leftButton.addEventListener('touchstart', (e) => handleInputStart(e, 'left'), { passive: false });
-            leftButton.addEventListener('touchend', (e) => handleInputEnd(e, 'left'));
-            rightButton.addEventListener('touchstart', (e) => handleInputStart(e, 'right'), { passive: false });
-            rightButton.addEventListener('touchend', (e) => handleInputEnd(e, 'right'));
-            leftButton.addEventListener('mousedown', (e) => handleInputStart(e, 'left'));
-            leftButton.addEventListener('mouseup', (e) => handleInputEnd(e, 'left'));
-            rightButton.addEventListener('mousedown', (e) => handleInputStart(e, 'right'));
-            rightButton.addEventListener('mouseup', (e) => handleInputEnd(e, 'right'));
+
+            leftButton.addEventListener("touchstart", (e) => handleInputStart(e, "left"), { passive: false });
+            leftButton.addEventListener("touchend", (e) => handleInputEnd(e, "left"));
+            rightButton.addEventListener("touchstart", (e) => handleInputStart(e, "right"), { passive: false });
+            rightButton.addEventListener("touchend", (e) => handleInputEnd(e, "right"));
+            leftButton.addEventListener("mousedown", (e) => handleInputStart(e, "left"));
+            leftButton.addEventListener("mouseup", (e) => handleInputEnd(e, "left"));
+            rightButton.addEventListener("mousedown", (e) => handleInputStart(e, "right"));
+            rightButton.addEventListener("mouseup", (e) => handleInputEnd(e, "right"));
 
             function showMenu() {
-                gameState = 'menu';
+                gameState = "menu";
                 player = new Player();
                 resizeCanvas();
                 draw();
-                showMessageBox(
-                    `<span class='text-3xl font-bold block mb-2'>The Poops</span><span class='text-sm block'>(똥 피하기 게임)</span><span class='text-xs block'>v${GAME_VERSION}</span>`,
-                    '',
-                    '게임 시작',
-                    initGame,
-                    false
-                );
+                const titleHTML = `
+                    <span class="text-3xl font-bold block mb-2">The Poops</span>
+                    <span class="text-sm block">(똥 피하기 게임)</span>
+                    <span class="text-xs block">v${GAME_VERSION}</span>
+                `;
+                const bodyHTML = "";
+                showMessageBox(titleHTML, bodyHTML, "게임 시작", initGame, false);
             }
 
             showMenu();
 
             // 리더보드 탭 버튼 이벤트
-            const tabButtons = document.querySelectorAll('.lb-tab');
+            const tabButtons = document.querySelectorAll(".lb-tab");
             tabButtons.forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    const mode = btn.dataset.mode || 'score';
+                btn.addEventListener("click", () => {
+                    const mode = btn.dataset.mode || "score";
                     leaderboardMode = mode;
                     tabButtons.forEach((b) => {
-                        b.classList.remove('bg-indigo-600', 'text-white');
-                        b.classList.add('bg-indigo-100', 'text-indigo-700');
+                        b.classList.remove("bg-indigo-600", "text-white");
+                        b.classList.add("bg-indigo-100", "text-indigo-700");
                     });
-                    btn.classList.remove('bg-indigo-100', 'text-indigo-700');
-                    btn.classList.add('bg-indigo-600', 'text-white');
+                    btn.classList.remove("bg-indigo-100", "text-indigo-700");
+                    btn.classList.add("bg-indigo-600", "text-white");
                     fetchLeaderboard(mode);
                 });
             });
