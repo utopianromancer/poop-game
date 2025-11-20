@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>똥 피하기 게임 (The Poops)</title>
+    <title>똥 피하기 게임 (Ddong Piha-gi) - Firebase 리더보드 버전</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -176,6 +176,21 @@
         @media (min-width: 640px) {
             #touchControls { display: none; }
         }
+        
+        /* 스테이지 라벨: 게임 배경(캔버스) 위 좌측 상단에 고정 표시 */
+        #stageLabel.stage-label {
+            position: absolute;
+            left: 12px;
+            top: 56px; /* 상단 상태바 아래쪽으로 내려서 플레이 영역 안에 보이게 */
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            line-height: 1.1;
+            background: rgba(0, 0, 0, 0.35);
+            color: #ffffff;
+            z-index: 20;
+        }
+        }
     </style>
 </head>
 <body class="p-4">
@@ -193,6 +208,7 @@
                     <span>⏱️</span><span id="timeValue">0.0s</span>
                 </div>
             </div>
+            <div id="stageLabel" class="stage-label">STAGE 1 · 시골</div>
             <canvas id="gameCanvas" width="500" height="500"></canvas>
             <div id="touchControls">
                 <div id="leftButton" class="touch-button">
@@ -247,11 +263,14 @@
             measurementId: "G-KP1WVHWND4"
         };
 
+        // ===== 전역 상태 =====
+        const GAME_VERSION = '1.0';
         let app, db, auth;
         let userId = 'anonymous';
         let nickname = '';
         let leaderboardMode = 'score'; // score | time | maxCombo
 
+        // ===== Firebase & 리더보드 =====
         async function setupFirebase() {
             const userIdDisplay = document.getElementById('userIdDisplay');
             try {
@@ -273,7 +292,9 @@
                 });
             } catch (error) {
                 console.error('Firebase 초기화/인증 에러:', error);
-                userIdDisplay.textContent = 'ID: 리더보드 비활성화 (에러)';
+                if (userIdDisplay) {
+                    userIdDisplay.textContent = 'ID: 리더보드 비활성화 (에러)';
+                }
             }
         }
 
@@ -299,12 +320,29 @@
             }
         }
 
+        // 짧은 날짜 포맷: YY-M-D am/pm H:MM
+        function formatShortDate(date) {
+            if (!date) return '';
+            const yy = date.getFullYear() % 100;
+            const m = date.getMonth() + 1;
+            const d = date.getDate();
+            let h = date.getHours();
+            const min = date.getMinutes();
+            const ampm = h >= 12 ? 'pm' : 'am';
+            h = h % 12;
+            if (h === 0) h = 12;
+            const mm = String(min).padStart(2, '0');
+            return `${yy}-${m}-${d} ${ampm} ${h}:${mm}`;
+        }
+
         // 리더보드 가져오기 (탭에 따라 정렬 기준 변경)
         async function fetchLeaderboard(mode = leaderboardMode) {
             if (!db) return;
             leaderboardMode = mode;
             const list = document.getElementById('leaderboardList');
-            list.innerHTML = '<li class="p-2 text-center text-gray-500">점수 목록을 가져오는 중...</li>';
+            if (list) {
+                list.innerHTML = '<li class="p-2 text-center text-gray-500">점수 목록을 가져오는 중...</li>';
+            }
             try {
                 let orderField = 'score';
                 if (mode === 'time') orderField = 'time';
@@ -321,12 +359,15 @@
                 renderLeaderboard(scores, mode);
             } catch (e) {
                 console.error('Error fetching leaderboard: ', e);
-                list.innerHTML = '<li class="p-2 text-red-500 text-center">리더보드 로드 실패</li>';
+                if (list) {
+                    list.innerHTML = '<li class="p-2 text-red-500 text-center">리더보드 로드 실패</li>';
+                }
             }
         }
 
         function renderLeaderboard(scores, mode = leaderboardMode) {
             const list = document.getElementById('leaderboardList');
+            if (!list) return;
             list.innerHTML = '';
             if (scores.length === 0) {
                 list.innerHTML = '<li class="p-2 text-center text-gray-500">아직 등록된 최고 점수가 없습니다.</li>';
@@ -336,7 +377,7 @@
                 const rank = index + 1;
                 const isCurrentUser = data.userId === userId;
                 const createdDate = data.createdAt && data.createdAt.toDate ? data.createdAt.toDate() : null;
-                const timeStr = createdDate ? createdDate.toLocaleString('ko-KR') : '';
+                const timeStr = formatShortDate(createdDate);
                 const survived = typeof data.time === 'number' ? `${data.time.toFixed(1)}초` : '-';
                 const maxComboText = typeof data.maxCombo === 'number' ? `${data.maxCombo}콤보` : '-';
 
@@ -369,6 +410,7 @@
 
         // ================= 게임 로직 =================
         document.addEventListener('DOMContentLoaded', () => {
+            // Firebase 세팅 시작
             setupFirebase();
 
             const canvas = document.getElementById('gameCanvas');
@@ -382,14 +424,16 @@
             const scoreValue = document.getElementById('scoreValue');
             const timeValue = document.getElementById('timeValue');
 
+            // 조작 감도 조절 값 (더 둔감하게)
             const MAX_PLAYER_SPEED = 5;
-            const ACCELERATION = 0.3;
-            const FRICTION = 0.9;
+            const ACCELERATION = 0.35;
+            const FRICTION = 0.92;
+
             const OBJECT_SIZE = 30;
             const BONUS_OBJECT_SIZE = 30;
             const POOP_HITBOX_SIZE = 20;
             const POOP_HITBOX_OFFSET = (OBJECT_SIZE - POOP_HITBOX_SIZE) / 2;
-            const BONUS_SCORE = 10;
+            const BONUS_SCORE = 5;
 
             const FEVER_COMBO_INTERVAL = 50;
             const FEVER_DURATION = 10000;
@@ -579,6 +623,8 @@
             function updateStageVisuals(stage) {
                 STAGES.forEach(s => gameContainer.classList.remove(s.css_class));
                 gameContainer.classList.add(stage.css_class);
+                const stageLabel = document.getElementById('stageLabel');
+                if (stageLabel) stageLabel.textContent = `STAGE ${currentStageIndex + 1} · ${stage.name}`;
             }
 
             function startFeverMode(now, currentComboLevel) {
@@ -660,7 +706,7 @@
                 }
 
                 fallingObjects = fallingObjects.filter(obj => obj.y < canvas.height + obj.size);
-                bonusObjects = bonusObjects.filter(obj => obj.y < canvas.height + obj.size);
+                bonusObjects = bonusObjects.filter(obj => obj.y <	canvas.height + obj.size);
 
                 checkCollisions();
                 updateUI();
@@ -730,7 +776,7 @@
             }
 
             function showMessageBox(title, text, buttonText, buttonAction, isGameOver) {
-                document.getElementById('messageTitle').textContent = title;
+                document.getElementById('messageTitle').innerHTML = title;
                 document.getElementById('messageText').innerHTML = text;
                 const newActionButton = actionButton.cloneNode(true);
                 actionButton.parentNode.replaceChild(newActionButton, actionButton);
@@ -756,7 +802,7 @@
                     saveScore(score, parseFloat(finalTime), finalMaxCombo);
                 }
                 showMessageBox(
-                    '게임 오버! 😭',
+                    `<span class='text-3xl font-bold block text-center'>GAME OVER</span>`,
                     `닉네임: <b>${nickname}</b><br>생존 시간: ${finalTime}초<br>점수: ${score}점<br>최대 콤보: ${finalMaxCombo}회`,
                     '다시 시작',
                     initGame,
@@ -830,8 +876,8 @@
                 resizeCanvas();
                 draw();
                 showMessageBox(
-                    '똥 피하기 게임',
-                    '닉네임을 입력하고 게임을 시작하세요!<br>게임이 끝나면 닉네임/점수/생존/최대콤보/종료 시간이 리더보드에 저장됩니다.',
+                    `<span class='text-3xl font-bold block mb-2'>The Poops</span><span class='text-sm block'>(똥 피하기 게임)</span><span class='text-xs block'>v${GAME_VERSION}</span>`,
+                    '',
                     '게임 시작',
                     initGame,
                     false
